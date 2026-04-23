@@ -1,41 +1,34 @@
-# simple reflex agent
-data={
-    'A': 'Dirty',
-    'B': 'Dirty',
-    'C': 'Clean'
+import random
+rooms={
+    'A':"DIRT",
+    'B':"DIRT",
+    'C':"DIRT"
 }
-location='A'
-def reflex_agent(location, status):
-    if status == 'Dirty':
-        return 'Clean'
-    else:
-        if location == 'A':
-            return 'MOVE_RIGHT'
-        elif location == 'B':
-            return 'MOVE_RIGHT'
-        elif location == 'C':
-            return 'MOVE_LEFT'
+current_location='A'
+rules=[['A',['DIRT','SUCK'],['CLEAN','LEFT']],
+['B',['DIRT','SUCK'],['CLEAN',random.choice(['LEFT','RIGHT'])]],
+['C',['DIRT','SUCK'],['CLEAN','RIGHT']]]
 
-print("Percept\t\tAction\t\tLocation")
-
-for step in range(6):
-    status = data[location]
-    percept = (location, status)
-
-    action = reflex_agent(location, status)
-
-    print(f"{percept}\t{action}\t\t{location}")
-
-    # Perform action
-    if action == 'Clean':
-        data[location] = 'Clean'
-    elif action == 'MOVE_RIGHT':
-        if location == 'A':
-            location = 'B'
-        elif location == 'B':
-            location = 'C'
-    elif action == 'MOVE_LEFT':
-        if location == 'C':
-            location = 'B'
-        elif location == 'B':
-            location = 'A'
+move=[['A','B'],['B',['A','C']],['C','B']]
+map={
+    'A':0,
+    'B':1,
+    'C':2,
+    'CLEAN':1,
+    'DIRT':2
+}
+for i in range(10):
+    status=rooms[current_location]
+    precept=(current_location,status)
+    action=rules[map[current_location]][map[status]][1]
+    print(f"{precept}\t{action}", end="")
+    if action=='SUCK':
+        rooms[current_location]="CLEAN"
+        print(f"\t\t\t{current_location}")
+    else :
+        idx = map[current_location]
+        if idx == 1:  
+            current_location = random.choice(move[1][1])
+        else:
+            current_location = move[idx][1]
+        print(f"\t\t\t{current_location}")

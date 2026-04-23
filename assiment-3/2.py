@@ -1,44 +1,24 @@
+environment = [
+    ["inbound_sensor",False],
+    ["outbound_sensor",False],
+    ["obstacle",False],
+    ["emergency_lever","Neutral"]
+]
+dict={
+    "inbound_sensor":0,
+    "outbound_sensor":1,
+    "obstacle":2,
+    "emergency_lever":3,
+    True:1,
+    False:0,
+    "Neutral":0,
+    "Active":1
 
-environment = {
-    "inbound_sensor": False,     # Train approaching
-    "outbound_sensor": False,    # Train leaving
-    "obstacle": False,           # Vehicle / animal stuck
-    "emergency_lever": "Neutral" # Neutral / Active
 }
-
-# -------- LEVEL CROSSING AGENT --------    
-def level_crossing_agent(percept):
-    # Rule 1: Manual Emergency Override (Highest Priority)
-    if percept["emergency_lever"] == "Active":
-        return {
-            "Gate": "Lower",
-            "Siren": "On",
-            "Train_Signal": "Red"
-        }
-
-    # Rule 2: Obstacle detected
-    if percept["obstacle"] == True:
-        return {
-            "Gate": "Lower",
-            "Siren": "On",
-            "Train_Signal": "Red"
-        }
-
-    # Rule 3: Train approaching or passing
-    if percept["inbound_sensor"] == True or percept["outbound_sensor"] == True:
-        return {
-            "Gate": "Lower",
-            "Siren": "On",
-            "Train_Signal": "Green"
-        }
-
-    # Rule 4: Normal safe condition
-    return {
-        "Gate": "Raise",
-        "Siren": "Off",
-        "Train_Signal": "Green"
-    }
-
+actions=[["inbound_sensor",[False,"Raise","Off","Green"],[True,"Lower","On","Red"]],
+        ["outbound_sensor",[False,"Raise","Off","Green"],[True,"Lower","On","Red"]],
+        ["obstacle",[False,"Raise","Off","Green"],[True,"Lower","On","Red"]],
+        ["emergency_lever",["Neutral","Raise","Off","Green"],["Active","Lower","On","Red"]]]
 
 # -------- SIMULATION --------
 print("PERCEPTS ------------------------> ACTIONS")
@@ -70,8 +50,20 @@ scenarios = [
     }
 ]
 
+print("PERCEPTS ------------------------> ACTIONS")
+
 for step, percept in enumerate(scenarios, start=1):
-    action = level_crossing_agent(percept)
+
     print(f"\nStep {step}")
     print("Percept:", percept)
-    print("Action :", action)
+
+    for rule in actions:
+        sensor = rule[0]
+
+        env_value = percept[sensor]        # True / False / Neutral / Active
+        value_index = dict[env_value]
+
+        selected_action = rule[value_index + 1][1:]
+        print(['Gate','Siren','train_Signal'])
+        print("Action :", selected_action)
+        break

@@ -1,55 +1,84 @@
-# ----------- GOAL STATE -----------
-GOAL = (0, 1, 2,
-        3, 4, 5,
-        6, 7, 8)
+import copy
 
-# ----------- POSSIBLE MOVES -----------
-MOVES = {
-    0: [1, 3],
-    1: [0, 2, 4],
-    2: [1, 5],
-    3: [0, 4, 6],
-    4: [1, 3, 5, 7],
-    5: [2, 4, 8],
-    6: [3, 7],
-    7: [4, 6, 8],
-    8: [5, 7]
-}
+GOAL = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8]
+]
 
-def dfs(start):
-    stack = []                  # stack as list
-    stack.append((start, 0))    # (state, depth)
+start_state = [
+    [1,0,2],
+    [3,4,5],
+    [6,7,8]
+]
 
-    visited = set()
-    visited.add(start)
+def find_zero(state):
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                return i, j
 
-    explored = 0
+moves = [(0,1),(0,-1),(1,0),(-1,0)]
 
-    while stack:
-        state, depth = stack.pop()   # LIFO
-        explored += 1
+reached = set()
+reached.add(tuple(map(tuple, start_state)))
 
-        if state == GOAL:
-            return explored, depth
+queue = [(start_state, 0)]   # (state, level)
+state_count = 1
 
-        zero = state.index(0)
+while queue:
+    current_state, level = queue.pop(0)
 
-        # children push kar rahe hain stack me
-        for move in MOVES[zero]:
-            new_state = list(state)
-            new_state[zero], new_state[move] = new_state[move], new_state[zero]
-            new_state = tuple(new_state)
+    if current_state == GOAL:
+        print(f"Goal reached at level {level}, states explored {state_count}")
+        break
 
-            if new_state not in visited:
-                visited.add(new_state)
-                stack.append((new_state, depth + 1))
+    row, col = find_zero(current_state)
 
-# ----------- START STATE -----------
-start_state = (7, 2, 4,
-               5, 0, 6,
-               8, 3, 1)
+    for dx, dy in moves:
+        new_r = row + dx
+        new_c = col + dy
 
-states_explored, goal_depth = dfs(start_state)
+        if 0 <= new_r < 3 and 0 <= new_c < 3:
+            temp = copy.deepcopy(current_state)
 
-print("States explored using DFS:", states_explored)
-print("Depth of goal state:", goal_depth)
+            # swap
+            temp[row][col], temp[new_r][new_c] = temp[new_r][new_c], temp[row][col]
+
+            state_tuple = tuple(map(tuple, temp))
+
+            if state_tuple not in reached:
+                reached.add(state_tuple)
+                state_count += 1
+                queue.append((temp, level+1))
+
+
+count = [0,100]
+reached=set()
+reached.add(tuple(map(tuple,start_state)))
+def DFS(state,reached,count):
+    if(state==GOAL):
+        print(f"Goal is found with total state count = {count[0]}")
+        return True
+
+    if(count[1]<0):
+        return False
+    row,col=find_zero(state)
+    for dx,dy in moves:
+        newx=dx+row
+        newy=dy+col
+        if 0<=newx<3 and 0<=newy< 3:
+            tem=copy.deepcopy(state)
+            tem[row][col],tem[newx][newy]=tem[newx][newy], tem[row][col]
+            state_tuple = tuple(map(tuple, tem))
+            if state_tuple not in reached:
+                reached.add(state_tuple)
+                count[0]+= 1
+                count[1]-=1
+                if DFS(tem,reached,count):
+                    return True
+    return False
+
+
+if not DFS(start_state, reached, count):
+    print("Goal not reachable")
